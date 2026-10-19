@@ -1,0 +1,23 @@
+name: Auto-Sync Mirror from Upstream
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Runs automatically every 6 hours
+  workflow_dispatch: # Allows manual trigger from the Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mirror Upstream Repository
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Bare clone upstream
+          git clone --bare https://github.com/Gituser112805/odysseus.git upstream.git
+          cd upstream.git
+          
+          # Set remote destination with auth token and push mirror
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push --mirror --force origin
